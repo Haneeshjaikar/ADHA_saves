@@ -61,8 +61,8 @@ management:
     web:
       base-path: /health-check
 telemetry:
-  connectionString: InstrumentationKey=97e38eb3-185b-426c-b56a-607fc3b2b166;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/
-  auditConnectionString: InstrumentationKey=97e38eb3-185b-426c-b56a-607fc3b2b166;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/
+  connectionString: update this
+  auditConnectionString: update this
 logging:
   level:
     root: INFO
@@ -83,7 +83,7 @@ available-blobstore:
   configurations:
     - containerName: blobappconfig
       pathMatcher: blobappconfig
-      connectionString: DefaultEndpointsProtocol=https;AccountName=blobstorage8989;AccountKey=px4q9NYUX11xUkFLYc6d05vx0Gib46Y2RLSZU5cck6FcUQZa9KYZSukkLVib4PrKWaTWOh3HVboB+AStqy00ug==;EndpointSuffix=core.windows.net
+      connectionString: updatethis
       primary: true
 refresh-interval: 900000
 ---
