@@ -1,0 +1,7 @@
+spring:
+  redis:
+    host: localhost
+azure:
+  keyvault:
+    enabled: false
+refresh-interval: 1000

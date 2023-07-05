@@ -1,0 +1,26 @@
+kind: TCPRoute
+apiVersion: specs.smi-spec.io/v1alpha4
+metadata:
+  name: "{{ .Values.appName }}-tcp-routes"
+spec:
+  matches:
+    ports:
+    - {{ .Values.service.targetPort }}
+---
+
+kind: TrafficTarget
+apiVersion: access.smi-spec.io/v1alpha3
+metadata:
+  name: app-loan-calculator-allowed-traffic
+spec:
+  destination:
+    kind: ServiceAccount
+    name: {{ .Values.appName }}
+    namespace: {{ .Release.Namespace }}
+  rules:
+  - kind: TCPRoute
+    name: "{{ .Values.appName }}-tcp-routes"
+  sources:
+  - kind: ServiceAccount
+    name: ms-federation
+    namespace: {{ .Release.Namespace }}

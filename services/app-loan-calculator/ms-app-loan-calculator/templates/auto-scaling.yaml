@@ -1,0 +1,18 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ .Values.appName }}-auto-scaling
+spec:
+  minReplicaCount: {{ .Values.autoScale.minReplicaCount }}
+  maxReplicaCount: {{ .Values.autoScale.maxReplicaCount }}
+  scaleTargetRef:
+    name: {{ .Values.appName }}
+  triggers:
+  - type: cpu
+    metricType: Utilization 
+    metadata:
+      value: {{ .Values.autoScale.cpuUtilization | quote}}
+  - type: memory
+    metricType: Utilization
+    metadata:
+      value: {{ .Values.autoScale.memoryUtilization | quote}}

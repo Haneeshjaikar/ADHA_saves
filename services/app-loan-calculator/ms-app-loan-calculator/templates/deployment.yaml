@@ -1,0 +1,222 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appName }}
+  labels:
+    app: {{ .Values.appName }}
+  annotations:
+    secret.reloader.stakater.com/reload: {{ .Values.global.secretName }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.appName }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.deployment.maxUnavailable | quote }}
+      maxSurge: {{ .Values.deployment.maxSurge | quote }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appName }}
+        aadpodidbinding: {{ .Values.podIDName }}
+    spec:
+      automountServiceAccountToken: false
+      volumes:
+        - name: {{ .Values.volumes.name }}
+          csi:
+            driver: {{ .Values.volumes.driver }}
+            readOnly: {{ .Values.volumes.readOnly }}
+            volumeAttributes:
+              secretProviderClass: {{ .Values.global.secretProviderClassName }}
+      serviceAccountName: {{ .Values.appName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+              cpu: {{ .Values.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.resources.limits.cpu }}
+          ports:
+            - name: {{ .Values.container.port.name }}
+              containerPort: {{ .Values.container.port.containerPort }}
+              protocol: {{ .Values.container.port.protocol }}
+          volumeMounts:
+            - name: {{ .Values.volumes.name }}
+              mountPath: {{ .Values.volumeMounts.mountPath }}
+              readOnly: {{ .Values.volumes.readOnly }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.container.probes.livenessProbe.path }}
+              port: {{ .Values.container.port.containerPort }}
+            failureThreshold: {{ .Values.container.probes.livenessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.container.probes.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.container.probes.readinessProbe.path }}
+              port: {{ .Values.container.port.containerPort }}
+            failureThreshold: {{ .Values.container.probes.readinessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.container.probes.readinessProbe.periodSeconds }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.container.probes.startupProbe.path }}
+              port: {{ .Values.container.port.containerPort }}
+            failureThreshold: {{ .Values.container.probes.startupProbe.failureThreshold }}
+            periodSeconds: {{ .Values.container.probes.startupProbe.periodSeconds }}
+          env:
+            - name: ENV
+              value: {{ .Values.env }}
+            - name: MS_NAME
+              value: app-loan-calculator
+            - name: AZURE_APP_INSIGHTS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: AZURE-APP-INSIGHTS-CONNECTION-STRING
+            - name: AZURE_BLOB_STORAGE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-AZURE-BLOB-STORAGE-CONFIG-CONNECTION-STRING
+            - name: ORM_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-ORM-HOST
+            - name: ORM_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-ORM-PORT
+            - name: ORM_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-ORM-USERNAME
+            - name: ORM_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-ORM-PASSWORD
+            - name: ORM_SERVICE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-ORM-SERVICE-NAME
+            - name: AZURE_BLOB_STORAGE_WSDL_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-AZURE-BLOB-STORAGE-WSDL-CONNECTION-STRING
+            - name: RABBITMQ_URI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-RABBITMQ-URI
+            - name: X_CENTRASITE_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-X-CENTRASITE-APIKEY 
+            - name: X_FORWARDED_FOR 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-X-FORWARDED-FOR                                                        
+            - name: CPC_AUTHORISATION 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-CPC-AUTHORISATION
+            - name: CPC_PTOKENID 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-CPC-PTOKENID
+            - name: DMT_WSDLSECURITY_USERNAME 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-DMT-WSDLSECURITY-USERNAME
+            - name: DMT_WSDLSECURITY_PASSWORD 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-DMT-WSDLSECURITY-PASSWORD 
+            - name: SZHP_USERNAME 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-SZHP-USERNAME
+            - name: SZHP_PASSWORD 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-SZHP-PASSWORD
+            - name: SZHP_IPHONEAPPKEY 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-SZHP-IPHONEAPPKEY 
+            - name: ICP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-ICP-USERNAME
+            - name: ICP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-ICP-PASSWORD 
+            - name: HASH_ENCRYPTION_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-HASH-ENCRYPTION-SECRET-KEY
+            - name: X_GATEWAY_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-X-GATEWAY-APIKEY                                                                                                                                                                                                                   
+            - name: MOF_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-MOF-PASSWORD                                                                                                                                                                                                                   
+            - name: MOF_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-MOF-USERNAME                                                                                                                                                                
+            - name: INTEGRATION_KEYCLOAK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-APPLICATION-INTEGRATION-CLIENT-ID
+            - name: INTEGRATION_KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-APPLICATION-INTEGRATION-CLIENT-SECRET
+            - name: CPC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-CPC-USERNAME
+            - name: CPC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-CPC-PASSWORD
+            - name: EMIRATE_ID_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.secretName }}
+                  key: CBA-EMIRATE-ID-KEY               

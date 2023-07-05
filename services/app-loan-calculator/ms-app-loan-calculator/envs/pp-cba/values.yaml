@@ -1,0 +1,98 @@
+# Default values for ms-app-loan-calculator.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+appName: ms-app-loan-calculator
+podIDName: aks-pod-identity
+
+image:
+  registry: osshubcontainerregistry.azurecr.io
+  repository: ms-app-loan-calculator
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+container:
+  port:
+    name: http
+    containerPort: 9090
+    protocol: TCP
+  probes:
+    livenessProbe:
+      path: /health-check
+      failureThreshold: 3
+      periodSeconds: 10
+    readinessProbe:
+      path: /health-check
+      failureThreshold: 3
+      periodSeconds: 10
+    startupProbe:
+      path: /health-check
+      failureThreshold: 30
+      periodSeconds: 10
+
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 9090
+  name: http
+
+volumes:
+  name: secrets-store-app-loan-calculator-inline
+  driver: secrets-store.csi.k8s.io
+  readOnly: true
+
+volumeMounts:
+  mountPath: /mnt/secrets-store
+
+cachedvolumes:
+  name: cache-volume
+  mountPath: ~/.gradle/caches
+
+tmpvolumes:
+  name: tmp-volume
+  mountPath: /tmp
+
+# Default values for secret-provider-class.
+# Declare variables to be passed into your templates.
+
+secret-provider-class:  
+  keyVaultName: iskan-pp-keyvault
+  keyVaultTenantId: 95b37b76-79ea-40da-bb32-cae91f5b3d11
+
+global:
+  secretProviderClassName: azure-kvsync-app-loan-calculator
+  secretName: ossapploancalculatorsvcsecrets
+
+resources:
+  requests:
+    memory: 300Mi
+    cpu: 50m
+  limits:
+    memory: 1Gi
+    cpu: 500m
+
+autoScale:
+  minReplicaCount: 2
+  maxReplicaCount: 10
+  cpuUtilization: "60"
+  memoryUtilization: "70"
+
+deployment:
+  maxUnavailable: "0%"
+  maxSurge: "100%"
+
+podSecurityContext:
+  fsGroup: 12000
+  runAsUser: 12000
+
+securityContext: 
+  capabilities:
+    drop:
+      - ALL
+  # readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 12000
+  allowPrivilegeEscalation: false
+
+env: "pp-cba"

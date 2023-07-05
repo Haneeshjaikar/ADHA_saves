@@ -1,0 +1,7 @@
+# Default values for secret-provider-class.
+# Declare variables to be passed into your templates.
+
+secretProviderClassName: ""
+keyVaultName: ""
+keyVaultTenantId: ""
+secretName: ""

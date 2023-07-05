@@ -1,0 +1,83 @@
+plugins {
+    id 'java'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'org.springframework.boot' version '3.0.6'
+    id "io.spring.dependency-management" version "1.1.0"
+  //  id 'org.barfuin.gradle.jacocolog' version '1.0.1'
+    id 'com.google.cloud.tools.jib' version '3.2.1'
+    id 'org.sonarqube' version '4.0.0.2929'
+    id 'net.linguica.maven-settings' version '0.5'
+}
+
+//List of files to be excluded from both unit test
+ext.excludeFilesFromTests = ['**/model/**','**/constant*/**', '**/*Constant*']
+apply from: 'base-gradle/baseGradle.gradle'
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation libraries.spring_boot_validations
+    // Core Dependencies
+    implementation libraries.jackson_annotations
+    implementation libraries.spring_boot_starter_web
+    implementation libraries.reactor_core
+    implementation libraries.jayway
+    implementation libraries.openapi
+
+//    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
+    runtimeOnly libraries.spring_boot_dev_tools
+    // Common libraries
+    implementation customLibraries.webclient
+    implementation customLibraries.util
+    implementation customLibraries.logging
+    implementation customLibraries.events
+    implementation customLibraries.metrics
+    implementation customLibraries.azureblobstore
+
+    implementation libraries.guava
+    implementation libraries.lombok
+    implementation libraries.azure_core
+    implementation(libraries.azure_kv) {
+        exclude group: 'com.azure', module: 'azure-core'
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-validation'
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter'
+    }
+    // Third party dependencies
+    implementation 	  libraries.jetbrains_annotations
+    annotationProcessor libraries.lombok
+    implementation libraries.flogger_slf4j
+    implementation libraries.mapstruct
+    implementation  (libraries.spring_boot_data_jpa) {
+        exclude group: 'org.apache.tomcat', module: 'tomcat-jdbc'
+    }
+    implementation libraries.ojdbc
+    annotationProcessor libraries.mapstruct_processor
+
+    implementation libraries.hypersistence
+
+    implementation libraries.netflix_graphql_dgs
+    implementation platform("com.netflix.graphql.dgs:graphql-dgs-platform-dependencies:6.0.0")
+    implementation libraries.appinsights_core
+    implementation libraries.appinsights_web
+
+    //Test dependencies
+    testImplementation 'org.springframework.amqp:spring-rabbit-test'
+    testImplementation testLibraries.mocksever_netty
+    testImplementation testLibraries.mockserver_spring_listener
+    testImplementation testLibraries.spring_boot_test
+    testImplementation testLibraries.hamcrest_core
+    testImplementation testLibraries.hamcrest_library
+    testImplementation testLibraries.mockito_core
+    testImplementation testLibraries.jupiter_api
+    testImplementation testLibraries.jupiter_engine
+    testImplementation testLibraries.junit_platform
+    testImplementation testLibraries.h2
+    testImplementation testLibraries.embeddedRedis
+    testImplementation testLibraries.freeport
+    testImplementation testLibraries.junit_jupiter
+    testRuntimeOnly testLibraries.junit_jupiter_engine
+    testImplementation testLibraries.junit_platform
+    testImplementation testLibraries.embeddedRedis
+}

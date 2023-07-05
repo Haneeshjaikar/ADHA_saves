@@ -1,0 +1,116 @@
+server:
+  port: 9090
+spring:
+  application:
+    name: app-loan-calculator-service
+    version: 0.0.1
+  jmx:
+    enabled: true
+  profiles:
+    active: ${DEPLOY_ENV:local}
+
+  datasource:
+    url: jdbc:oracle:thin:@${ORM_HOST}:${ORM_PORT}/${ORM_SERVICE_NAME}
+    username: ${ORM_USERNAME}
+    password: ${ORM_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+  jpa:
+    database-platform: org.hibernate.dialect.OracleDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/application
+#    username: root
+#    password: Enter29@1999
+#    driver-class-name: com.mysql.jdbc.Driver
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: update
+#    generate-ddl: true
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQL8Dialect
+
+
+rabbitmq:
+  exchange:
+#    name: loan-calculator
+    name: mishra_exchange2
+  queue:
+#    name: loan-calculator-queue
+    name: loan_calculator
+  routing_key:
+#    name: loanCalculatorQue
+    name: routingkey_json2
+  host: localhost
+  username: guest
+  password: guest
+  port: 5672
+  virtual-host: /
+redis:
+  host: localhost
+
+  port: 6379
+deployment:
+  env: local
+management:
+  endpoints:
+    web:
+      base-path: /health-check
+telemetry:
+  connectionString: InstrumentationKey=97e38eb3-185b-426c-b56a-607fc3b2b166;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/
+  auditConnectionString: InstrumentationKey=97e38eb3-185b-426c-b56a-607fc3b2b166;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+springdoc:
+  api-docs.enabled: true
+  swagger-ui.enabled: true
+headers:
+  required: '{''traceparent'':''Relates all linked requests''}'
+  optional: '{''X-SESSION-ID'':''Session Identifier''}'
+  authorization: Authorization
+#BLOB_STORAGE_CONNECTION_STRING: ${AZURE_BLOB_STORAGE_CONNECTION_STRING}
+available-blobstore:
+  mockStoreEnabled: false
+  defaultConfig: default
+  globalConfigPath: base/global.config.json
+  configurations:
+    - containerName: blobappconfig
+      pathMatcher: blobappconfig
+      connectionString: DefaultEndpointsProtocol=https;AccountName=blobstorage8989;AccountKey=px4q9NYUX11xUkFLYc6d05vx0Gib46Y2RLSZU5cck6FcUQZa9KYZSukkLVib4PrKWaTWOh3HVboB+AStqy00ug==;EndpointSuffix=core.windows.net
+      primary: true
+refresh-interval: 900000
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+deployment:
+  env: dev
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+deployment:
+  env: test
+---
+spring:
+  config:
+    activate:
+      on-profile: pre
+deployment:
+  env: pre
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+deployment:
+  env: prod
